@@ -7,12 +7,14 @@
 //
 
 #import "XMPPMessageCoreDataStorageObject.h"
+#import "XMPPUnReadMessageCoreDataStorageObject.h"
 
 
 @implementation XMPPMessageCoreDataStorageObject
 
 @dynamic bareJidStr;
 @dynamic hasBeenRead;
+@dynamic messageType;
 @dynamic isChatRoomMessage;
 @dynamic isPrivate;
 @dynamic messageID;
@@ -109,6 +111,22 @@
     [self didChangeValueForKey:@"sendFromMe"];
 }
 
+- (NSNumber *)messageType
+{
+    [self willAccessValueForKey:@"messageType"];
+    NSNumber *value = [self primitiveValueForKey:@"messageType"];
+    [self didAccessValueForKey:@"messageType"];
+    return value;
+}
+
+- (void)setMessageType:(NSNumber *)value
+{
+    [self willChangeValueForKey:@"messageType"];
+    [self setPrimitiveValue:value forKey:@"messageType"];
+    [self didChangeValueForKey:@"messageType"];
+}
+
+
 - (NSDate *)messageTime
 {
     [self willAccessValueForKey:@"messageTime"];
@@ -192,29 +210,84 @@
     XMPPMessageCoreDataStorageObject *newObject = [NSEntityDescription insertNewObjectForEntityForName:@"XMPPMessageCoreDataStorageObject"
                                               inManagedObjectContext:moc];
     
-    newObject.messageID = messageID;
-    newObject.streamBareJidStr = streamBareJidStr;
-    newObject.bareJidStr = [messageDic objectForKey:@"bareJidStr"];
-    newObject.sendFromMe = [messageDic objectForKey:@"sendFromMe"];
-    newObject.messageTime = [messageDic objectForKey:@"messageTime"];
-    newObject.hasBeenRead = [messageDic objectForKey:@"hasBeenRead"];
-    newObject.isChatRoomMessage = [messageDic objectForKey:@"isChatRoomMessage"];
-    newObject.isPrivate = [messageDic objectForKey:@"isPrivate"];
-    newObject.messageBody =
+//    newObject.messageID = messageID;
+//    newObject.streamBareJidStr = streamBareJidStr;
+//    newObject.bareJidStr = [messageDic objectForKey:@"bareJidStr"];
+//    newObject.sendFromMe = [messageDic objectForKey:@"sendFromMe"];
+//    newObject.messageTime = [messageDic objectForKey:@"messageTime"];
+//    newObject.hasBeenRead = [messageDic objectForKey:@"hasBeenRead"];
+//    newObject.isChatRoomMessage = [messageDic objectForKey:@"isChatRoomMessage"];
+//    newObject.isPrivate = [messageDic objectForKey:@"isPrivate"];
+//    newObject.messageBody = [messageDic objectForKey:@"messageBody"];
+//    newObject.messageType = [messageDic objectForKey:@"messageType"];
+    
+    [newObject updateWithDictionary:messageDic streamBareJidStr:streamBareJidStr];
+    
+    //Add the unread message count or insert a new unread message info
+    [XMPPUnReadMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                                        withUserJIDstr:[messageDic objectForKey:@"bareJidStr"]
+                                                                    unReadMessageCount:[(NSNumber *)[messageDic objectForKey:@"unReadMessageCount"] unsignedIntegerValue]
+                                                                      streamBareJidStr:streamBareJidStr];
     
     return newObject;
-
 }
 
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                              withMessageDictionary:(NSDictionary *)messageDic
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-    return nil;
+    NSString *messageID = [messageDic objectForKey:@"messageID"];
+    if (messageID == nil) return nil;
+    if (streamBareJidStr == nil) return nil;
+    if (moc == nil) return nil;
+    
+    XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+                                                                                                      withMessageID:messageID streamBareJidStr:streamBareJidStr];
+    //if the object we find alreadly in the coredata system ,we should update it
+    if (updateObject){
+        
+//        [updateObject setMessageID:messageID];
+//        [updateObject setMessageTime:[messageDic objectForKey:@"messageTime"]];
+//        [updateObject setIsPrivate:[messageDic objectForKey:@"isPrivate"]];
+//        [updateObject setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
+//        [updateObject setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
+//        [updateObject setStreamBareJidStr:streamBareJidStr];
+//        [updateObject setIsChatRoomMessage:[messageDic objectForKey:@"isChatRoomMessage"]];
+//        [updateObject setMessageBody:[messageDic objectForKey:@"messageBody"]];
+//        [updateObject setMessageType:[messageDic objectForKey:@"messageType"]];
+//        [updateObject setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
+        
+        [updateObject updateWithDictionary:messageDic streamBareJidStr:streamBareJidStr];
+        
+        return YES;
+        
+    }else{//if not find the object in the CoreData system ,we should insert the new object to it
+        //FIXME:There is a bug meybe here
+        updateObject = [XMPPMessageCoreDataStorageObject insertInManagedObjectContext:moc
+                                                                withMessageDictionary:messageDic
+                                                                     streamBareJidStr:streamBareJidStr];
+        if(updateObject != nil) return YES;
+    }
+    
+    return NO;
+
 }
 
 #pragma mark -
 #pragma mark - Private Methods
+- (void)updateWithDictionary:(NSDictionary *)messageDic streamBareJidStr:(NSString *)streamBareJidStr
+{
+    [self setMessageID:[messageDic objectForKey:@"messageID"]];
+    [self setMessageTime:[messageDic objectForKey:@"messageTime"]];
+    [self setIsPrivate:[messageDic objectForKey:@"isPrivate"]];
+    [self setBareJidStr:[messageDic objectForKey:@"bareJidStr"]];
+    [self setSendFromMe:[messageDic objectForKey:@"sendFromMe"]];
+    [self setHasBeenRead:[messageDic objectForKey:@"hasBeenRead"]];
+    [self setMessageType:[messageDic objectForKey:@"messageType"]];
+    [self setStreamBareJidStr:streamBareJidStr];
+    [self setIsChatRoomMessage:[messageDic objectForKey:@"isChatRoomMessage"]];
+    [self setMessageBody:[messageDic objectForKey:@"messageBody"]];
+}
 
 @end
 

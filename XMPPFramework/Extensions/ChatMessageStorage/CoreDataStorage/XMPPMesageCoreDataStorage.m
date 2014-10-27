@@ -8,6 +8,7 @@
 
 #import "XMPPMesageCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
+#import "XMPPMessageCoreDataStorageObject.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
@@ -55,6 +56,125 @@ static XMPPMesageCoreDataStorage *sharedInstance;
     
     //chatRoomPopulationSet = [[NSMutableSet alloc] init];
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Tool methods
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ *  Get the UTC string from the local date string
+ *
+ *  @param localDate The local date string
+ *
+ *  @return The UTC string we will get
+ */
+-(NSString *)getUTCStringWithLocalDateString:(NSString *)localDate
+{
+    //将本地日期字符串转为UTC日期字符串
+    //本地日期格式:2013-08-03 12:53:51
+    //可自行指定输入输出格式
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    //输入格式
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    NSDate *dateFormatted = [dateFormatter dateFromString:localDate];
+    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+    [dateFormatter setTimeZone:timeZone];
+    //输出格式
+    [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+    NSString *dateString = [dateFormatter stringFromDate:dateFormatted];
+    return dateString;
+}
+/**
+ *  The local date string we get with the UTC date string
+ *
+ *  @param utcDate The UTC date string
+ *
+ *  @return The local date string we will get
+ */
+-(NSString *)getLocalDateStringWithUTCDateString:(NSString *)utcDate
+{
+    //将UTC日期字符串转为本地时间字符串
+    //输入的UTC日期格式2013-08-03T04:53:51+0000
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    //输入格式
+    [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+    NSTimeZone *localTimeZone = [NSTimeZone localTimeZone];
+    [dateFormatter setTimeZone:localTimeZone];
+    
+    NSDate *dateFormatted = [dateFormatter dateFromString:utcDate];
+    //输出格式
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    NSString *dateString = [dateFormatter stringFromDate:dateFormatted];
+    return dateString;
+}
+/**
+ *  Get the UTC date string from the local date object
+ *
+ *  @param localDate The local date object
+ *
+ *  @return The UTC date string we will get
+ */
+- (NSString *)getUTCStringWithLocalDate:(NSDate *)localDate
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    NSTimeZone *timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
+    [dateFormatter setTimeZone:timeZone];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss Z"];
+    NSString *dateString = [dateFormatter stringFromDate:localDate];
+    return dateString;
+}
+/**
+ *  Get the local date object with the given UTC date string
+ *
+ *  @param utc The utc date string
+ *
+ *  @return The local date obejct we will get
+ */
+- (NSDate *)getLocalDateWithUTCString:(NSString *)utc
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    NSTimeZone *timeZone = [NSTimeZone localTimeZone];
+    [dateFormatter setTimeZone:timeZone];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss Z"];
+    NSDate *ldate = [dateFormatter dateFromString:utc];
+    return ldate;
+}
+/**
+ *  Get the date obejct With the given date string
+ *
+ *  @param strdate The given date string
+ *
+ *  @return The Date object we will get
+ */
+- (NSDate *)stringToDate:(NSString *)strdate
+{
+    //NSString 2 NSDate
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    NSDate *retdate = [dateFormatter dateFromString:strdate];
+    return retdate;
+}
+/**
+ *  Get the date string with the given date object
+ *
+ *  @param date The given object
+ *
+ *  @return The string we will get
+ */
+- (NSString *)dateToString:(NSDate *)date
+{
+    //NSDate 2 NSString
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    NSString *strDate = [dateFormatter stringFromDate:date];
+    return strDate;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,21 +191,29 @@ static XMPPMesageCoreDataStorage *sharedInstance;
 {
     [self scheduleBlock:^{
         
+//        XMPPMessage *newMessage = [message copy];
+        
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *myBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
         NSString *userJidStr = sendFromMe ? [[message to] bare]:[[message from] bare];
         NSUInteger unReadMessageCount = sendFromMe ? 0:([[[message from] bare] isEqualToString:activeUser] ? 0:1);
-        
+        NSUInteger messageType = [[[message elementForName:@"messageType"] stringValue] integerValue];
+        NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[message elementForName:@"messageTime"] stringValue]];//System time:Server time
         NSString *jsonString = [message body];
-        //This Dictionary has no from,to,sendFromMe,
+        //This Dictionary has no from,to,sendFromMe,unReadMessageCount
         NSMutableDictionary *messageDic = [jsonString objectFromJSONString];
         [messageDic setObject:myBareJidStr forKey:@"streamBareJidStr"];
         [messageDic setObject:userJidStr forKey:@"bareJidStr"];
         [messageDic setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
+        [messageDic setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
+        [messageDic setObject:[NSNumber numberWithBool:(unReadMessageCount > 0)] forKey:@"hasBeenRead"];
+        [messageDic setObject:messageTime forKey:@"messageTime"];
         //If the unread message count is equal to zero,we will know that this message has been readed
-        [messageDic setObject:[NSNumber numberWithBool:(unReadMessageCount < 1)] forKey:@"hasBeenRead"];
+        [messageDic setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
         
-        
+        [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
+                                                               withMessageDictionary:messageDic
+                                                                    streamBareJidStr:myBareJidStr];
         
     }];
 }

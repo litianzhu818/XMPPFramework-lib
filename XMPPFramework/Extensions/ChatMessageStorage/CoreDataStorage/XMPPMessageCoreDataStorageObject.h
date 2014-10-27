@@ -14,6 +14,7 @@
 @interface XMPPMessageCoreDataStorageObject : NSManagedObject
 
 @property (nonatomic, retain) NSString                  * bareJidStr;
+@property (nonatomic, retain) NSNumber                  * messageType;
 @property (nonatomic, retain) NSNumber                  * hasBeenRead;
 @property (nonatomic, retain) NSNumber                  * isChatRoomMessage;
 @property (nonatomic, retain) NSNumber                  * isPrivate;

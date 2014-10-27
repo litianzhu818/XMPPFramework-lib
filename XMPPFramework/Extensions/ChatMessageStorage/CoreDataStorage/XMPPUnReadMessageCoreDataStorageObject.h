@@ -29,4 +29,17 @@
                                     withUserJIDstr:(NSString *)jidStr
                                 unReadMessageCount:(NSUInteger)unReadCount
                                   streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)editObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withUserJIDstr:(NSString *)jidStr
+                       nReadMessageCount:(NSUInteger)unReadCount
+                        streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)deleteObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withUserJIDstr:(NSString *)jidStr
+                        streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)readObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                            withUserJIDstr:(NSString *)jidStr
+                          streamBareJidStr:(NSString *)streamBareJidStr;
 @end

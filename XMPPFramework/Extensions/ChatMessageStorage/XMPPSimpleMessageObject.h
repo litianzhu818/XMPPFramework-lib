@@ -7,10 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DDXML.h"
 
 @interface XMPPSimpleMessageObject : NSObject<NSCopying,NSCoding>
-
-@property (assign, nonatomic) NSUInteger  messageType;      //The message type
 
 //Text message
 @property (strong, nonatomic) NSString    *messageText;     //The text type message's text body
@@ -26,12 +25,26 @@
 //This parameter value only can been used when set the parameter "isChatRoomMessage = YES"
 @property (strong, nonatomic) NSString    *chatRoomUserJid;  //The jid string of the user in the Chat room message，we can know who send this chat room message during a room chatting
 
-//位置消息
+//The position information
 @property (strong, nonatomic) NSString    *longitude;       //longitude
 @property (strong, nonatomic) NSString    *latitude;        //latitude
 
-@property (assign, nonatomic) CGFloat     aspectRatio;      //image width/height
-
+@property (assign, nonatomic) CGFloat     aspectRatio;      //image width&height
+/**
+ *  Init with a xml element
+ *
+ *  @param element xml element
+ *
+ *  @return self
+ */
+-(instancetype)initWithXMLElement:(NSXMLElement *)element;
+/**
+ *  Init with a dictionary
+ *
+ *  @param dictionary dictionary
+ *
+ *  @return self
+ */
 -(instancetype)initWithDictionary:(NSMutableDictionary *)dictionary;
 /**
  *  Transform the Message object into a Dictionary Object
@@ -45,5 +58,18 @@
  *  @param message The message object
  */
 -(void)fromDictionary:(NSMutableDictionary*)message;
+/**
+ *  Get a xmlElement from the XMPPSimpleMessageObject
+ *
+ *  @return The XML element we will get
+ */
+-(NSXMLElement *)toXMLElement;
+/**
+ *  Get the XMPPSimpleMessageObject from a xml element
+ *
+ *  @param xmlElement The xml element
+ */
+-(void)fromXMLElement:(NSXMLElement *)xmlElement;
+
 
 @end
