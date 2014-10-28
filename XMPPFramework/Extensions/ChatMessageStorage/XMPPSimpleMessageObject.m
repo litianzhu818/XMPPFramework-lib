@@ -9,9 +9,6 @@
 #import "XMPPSimpleMessageObject.h"
 #import "XMPPFramework.h"
 
-#define ADDITION_ELEMENT_NAME               @"additionMessageInfo"
-#define ADDITION_ELEMENT_XMLNS              @"http://kissnapp.com/message/AdditionMessage"
-
 #define MESSAGE_TEXT_ELEMENT_NAME           @"messageText"
 #define FILE_PATH_ELEMENT_NAME              @"filePath"
 #define FILE_NAME_ELEMENT_NAME              @"fileName"

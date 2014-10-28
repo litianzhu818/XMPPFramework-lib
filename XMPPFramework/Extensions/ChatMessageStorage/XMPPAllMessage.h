@@ -39,6 +39,9 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 - (void)addActiveUser:(NSString *)userBareJidStr Delegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
 - (void)removeActiveUserAndDelegate:(id)delegate;
 
+- (void)clearChatHistoryWithUserJid:(XMPPJID *)userJid;
+- (void)readAllUnreadMessageWithUserJid:(XMPPJID *)userJid;
+
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
 @property (readwrite, assign) BOOL clientSideMessageArchivingOnly;
@@ -59,6 +62,8 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
 
 - (BOOL)configureWithParent:(XMPPAllMessage *)aParent queue:(dispatch_queue_t)queue;
 - (void)archiveMessage:(XMPPMessage *)message sendFromMe:(BOOL)sendFromMe activeUser:(NSString *)activeUser xmppStream:(XMPPStream *)stream;
+- (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
+- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)xmppStream;
 
 @optional
 

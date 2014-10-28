@@ -12,6 +12,7 @@
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
+#import "XMPPMessage+AdditionMessage.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -195,26 +196,104 @@ static XMPPMesageCoreDataStorage *sharedInstance;
         
         NSManagedObjectContext *moc = [self managedObjectContext];
         NSString *myBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
-        NSString *userJidStr = sendFromMe ? [[message to] bare]:[[message from] bare];
-        NSUInteger unReadMessageCount = sendFromMe ? 0:([[[message from] bare] isEqualToString:activeUser] ? 0:1);
-        NSUInteger messageType = [[[message elementForName:@"messageType"] stringValue] integerValue];
-        NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[message elementForName:@"messageTime"] stringValue]];//System time:Server time
-        NSString *jsonString = [message body];
-        //This Dictionary has no from,to,sendFromMe,unReadMessageCount
-        NSMutableDictionary *messageDic = [jsonString objectFromJSONString];
-        [messageDic setObject:myBareJidStr forKey:@"streamBareJidStr"];
-        [messageDic setObject:userJidStr forKey:@"bareJidStr"];
-        [messageDic setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
-        [messageDic setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
-        [messageDic setObject:[NSNumber numberWithBool:(unReadMessageCount > 0)] forKey:@"hasBeenRead"];
-        [messageDic setObject:messageTime forKey:@"messageTime"];
-        //If the unread message count is equal to zero,we will know that this message has been readed
-        [messageDic setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
+//        NSString *userJidStr = sendFromMe ? [[message to] bare]:[[message from] bare];
+//        NSUInteger unReadMessageCount = sendFromMe ? 0:([[[message from] bare] isEqualToString:activeUser] ? 0:1);
+//        NSUInteger messageType = [[[[message elementForName:@"body"] elementForName:@"messageType"] stringValue] integerValue];
+//        NSDate  *messageTime = sendFromMe ? [NSDate date]:[self getLocalDateWithUTCString:[[message elementForName:@"messageTime"] stringValue]];//System time:Server time
+//        NSString *jsonString = [message body];
+//        //This Dictionary has no from,to,sendFromMe,unReadMessageCount
+//        NSMutableDictionary *messageDic = [jsonString objectFromJSONString];
+//        [messageDic setObject:myBareJidStr forKey:@"streamBareJidStr"];
+//        [messageDic setObject:userJidStr forKey:@"bareJidStr"];
+//        [messageDic setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
+//        [messageDic setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
+//        [messageDic setObject:[NSNumber numberWithBool:(unReadMessageCount > 0)] forKey:@"hasBeenRead"];
+//        [messageDic setObject:messageTime forKey:@"messageTime"];
+//        //If the unread message count is equal to zero,we will know that this message has been readed
+//        [messageDic setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
         
         [XMPPMessageCoreDataStorageObject updateOrInsertObjectInManagedObjectContext:moc
-                                                               withMessageDictionary:messageDic
+                                                               withMessageDictionary:[message toDictionaryWithSendFromMe:sendFromMe activeUser:activeUser]
                                                                     streamBareJidStr:myBareJidStr];
         
+    }];
+}
+
+- (void)readAllUnreadMessageWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        // Note: Deleting a user will delete all associated resources
+        // because of the cascade rule in our core data model.
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream)
+        {
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && streamBareJidStr == %@",bareUserJid,
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allUsers = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPUserCoreDataStorageObject *user in allUsers)
+        {
+            [moc deleteObject:user];
+            
+            if (++unsavedCount >= saveThreshold)
+            {
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+        
+        [XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:moc];
+
+    }];
+}
+- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && streamBareJidStr == %@",bareUserJid,
+                         [[self myJIDForXMPPStream:stream] bare]];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allMessages = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPMessageCoreDataStorageObject *message in allMessages){
+            [moc deleteObject:message];
+            
+            if (++unsavedCount >= saveThreshold){
+                [self save];
+                unsavedCount = 0;
+            }
+        }
     }];
 }
 

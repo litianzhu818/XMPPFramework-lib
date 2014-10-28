@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "DDXML.h"
 
+#define ADDITION_ELEMENT_NAME               @"additionMessageInfo"
+#define ADDITION_ELEMENT_XMLNS              @"http://kissnapp.com/message/AdditionMessage"
+
 @interface XMPPSimpleMessageObject : NSObject<NSCopying,NSCoding>
 
 //Text message

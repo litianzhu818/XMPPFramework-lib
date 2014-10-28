@@ -9,7 +9,6 @@
 #import "XMPPMessageCoreDataStorageObject.h"
 #import "XMPPUnReadMessageCoreDataStorageObject.h"
 
-
 @implementation XMPPMessageCoreDataStorageObject
 
 @dynamic bareJidStr;
@@ -237,9 +236,9 @@
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
     NSString *messageID = [messageDic objectForKey:@"messageID"];
-    if (messageID == nil) return nil;
-    if (streamBareJidStr == nil) return nil;
-    if (moc == nil) return nil;
+    if (messageID == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    if (moc == nil) return NO;
     
     XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
                                                                                                       withMessageID:messageID streamBareJidStr:streamBareJidStr];

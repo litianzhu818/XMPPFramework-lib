@@ -295,6 +295,31 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     [self removeDelegate:self];
 }
 
+- (void)clearChatHistoryWithUserJid:(XMPPJID *)userJid
+{
+    dispatch_block_t block = ^{
+        NSString *bareUserJidStr = [[userJid copy] bare];
+        [self clearChatHistoryWithBareUserJidStr:bareUserJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+- (void)readAllUnreadMessageWithUserJid:(XMPPJID *)userJid
+{
+    dispatch_block_t block = ^{
+        NSString *bareUserJidStr = [[userJid copy] bare];
+        [self readAllUnreadMessageWithBareUserJidStr:bareUserJidStr xmppStream:xmppStream];
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark operate the message
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,6 +333,19 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     }
 }
 
+- (void)clearChatHistoryWithBareUserJidStr:(NSString *)userJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    [xmppMessageStorage clearChatHistoryWithBareUserJid:userJidStr xmppStream:stream];
+}
+
+- (void)readAllUnreadMessageWithBareUserJidStr:(NSString *)userJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    [xmppMessageStorage readAllUnreadMessageWithBareUserJid:userJidStr xmppStream:stream];
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPStream Delegate
@@ -366,6 +404,26 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
     else
         dispatch_async(moduleQueue, block);
     
+}
+
+- (void)xmppStream:(XMPPStream *)sender didFailToSendMessage:(XMPPMessage *)message error:(NSError *)error
+{
+    XMPPLogTrace();
+    
+    dispatch_block_t block = ^{
+            //TODO:Here should note the unsend message
+//        if ([message isChatMessage]) {
+//            //save the message
+//            [self saveMessageActionWithXMPPStream:sender message:message sendFromMe:NO];
+//            [multicastDelegate xmppAllMessage:self receiveMessage:message];
+//        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+
 }
 
 - (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
