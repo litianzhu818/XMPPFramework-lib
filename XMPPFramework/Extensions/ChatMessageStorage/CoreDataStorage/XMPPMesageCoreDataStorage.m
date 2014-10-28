@@ -9,6 +9,7 @@
 #import "XMPPMesageCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPMessageCoreDataStorageObject.h"
+#import "XMPPUnReadMessageCoreDataStorageObject.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "NSNumber+XMPP.h"
@@ -226,46 +227,7 @@ static XMPPMesageCoreDataStorage *sharedInstance;
         // because of the cascade rule in our core data model.
         
         NSManagedObjectContext *moc = [self managedObjectContext];
-        
-        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
-                                                  inManagedObjectContext:moc];
-        
-        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-        [fetchRequest setEntity:entity];
-        [fetchRequest setFetchBatchSize:saveThreshold];
-        
-        if (stream)
-        {
-            NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && streamBareJidStr == %@",bareUserJid,
-                         [[self myJIDForXMPPStream:stream] bare]];
-            
-            [fetchRequest setPredicate:predicate];
-        }
-        
-        NSArray *allUsers = [moc executeFetchRequest:fetchRequest error:nil];
-        
-        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
-        
-        for (XMPPUserCoreDataStorageObject *user in allUsers)
-        {
-            [moc deleteObject:user];
-            
-            if (++unsavedCount >= saveThreshold)
-            {
-                [self save];
-                unsavedCount = 0;
-            }
-        }
-        
-        [XMPPGroupCoreDataStorageObject clearEmptyGroupsInManagedObjectContext:moc];
-
-    }];
-}
-- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
-{
-    [self scheduleBlock:^{
-        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
         
         NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
                                                   inManagedObjectContext:moc];
@@ -276,8 +238,50 @@ static XMPPMesageCoreDataStorage *sharedInstance;
         
         if (stream){
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"bareJidStr == %@ && streamBareJidStr == %@",bareUserJid,
-                         [[self myJIDForXMPPStream:stream] bare]];
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
+                         streamBareJidStr,@"hasBeenRead",@0];
+            
+            [fetchRequest setPredicate:predicate];
+        }
+        
+        NSArray *allMessages = [moc executeFetchRequest:fetchRequest error:nil];
+        
+        NSUInteger unsavedCount = [self numberOfUnsavedChanges];
+        
+        for (XMPPMessageCoreDataStorageObject *message in allMessages){
+            //[moc deleteObject:message];
+            //update the hasBeenRead attribute
+            message.hasBeenRead = [NSNumber numberWithBool:YES];
+            
+            if (++unsavedCount >= saveThreshold){
+                [self save];
+                unsavedCount = 0;
+            }
+        }
+        //Update the unread message object
+        [XMPPUnReadMessageCoreDataStorageObject readObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
+
+    }];
+}
+
+- (void)clearChatHistoryWithBareUserJid:(NSString *)bareUserJid xmppStream:(XMPPStream *)stream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:stream] bare];
+        
+        NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                                  inManagedObjectContext:moc];
+        
+        NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+        [fetchRequest setEntity:entity];
+        [fetchRequest setFetchBatchSize:saveThreshold];
+        
+        if (stream){
+            NSPredicate *predicate;
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
+                         streamBareJidStr];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -294,6 +298,8 @@ static XMPPMesageCoreDataStorage *sharedInstance;
                 unsavedCount = 0;
             }
         }
+        //Delete the unread message object
+        [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
     }];
 }
 

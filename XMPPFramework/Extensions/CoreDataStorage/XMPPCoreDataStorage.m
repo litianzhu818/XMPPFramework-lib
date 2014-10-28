@@ -146,10 +146,10 @@ static NSMutableSet *databaseFileNames;
 	if (storePath)
 	{
 		// SQLite persistent store
-		
+    
 		NSURL *storeUrl = [NSURL fileURLWithPath:storePath];
 		
-		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType
+		persistentStore = [persistentStoreCoordinator addPersistentStoreWithType:NSBinaryStoreType/*NSSQLiteStoreType*/
 		                                                           configuration:nil
 		                                                                     URL:storeUrl
 		                                                                 options:storeOptions

@@ -87,6 +87,24 @@
     return newObject;
 }
 
++ (BOOL)deleteObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                            withUserJIDstr:(NSString *)jidStr
+                          streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (jidStr == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    if (moc == nil) return NO;
+    
+    XMPPUnReadMessageCoreDataStorageObject *deleteObject = [XMPPUnReadMessageCoreDataStorageObject obejctInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
+    
+    if (!deleteObject) return NO;
+    
+    [moc deleteObject:deleteObject];
+    
+    return YES;
+}
+
+
 + (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDStr:(NSString *)jidStr
                   streamBareJidStr:(NSString *)streamBareJidStr
@@ -117,7 +135,7 @@
                                 unReadMessageCount:(NSUInteger)unReadCount
                                   streamBareJidStr:(NSString *)streamBareJidStr
 {
-
+    
     if (jidStr == nil) return NO;
     if (streamBareJidStr == nil) return NO;
     if (moc == nil) return NO;
@@ -144,6 +162,22 @@
     return NO;
 }
 
++ (BOOL)readObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                          withUserJIDstr:(NSString *)jidStr
+                        streamBareJidStr:(NSString *)streamBareJidStr
+{
+    if (jidStr == nil) return NO;
+    if (streamBareJidStr == nil) return NO;
+    if (moc == nil) return NO;
+    
+    XMPPUnReadMessageCoreDataStorageObject *readObject = [XMPPUnReadMessageCoreDataStorageObject obejctInManagedObjectContext:moc withUserJIDStr:jidStr streamBareJidStr:streamBareJidStr];
+    //if the object we find alreadly in the coredata system ,we should update it
+    if (!readObject) return NO;
+    
+    readObject.unReadCount = [NSNumber numberWithUnsignedInteger:0];
+    
+    return YES;
+}
 
 - (void)updateWithBareJid:(NSString *)bareJid unReadCount:(NSUInteger)unReadCount streamBareJidStr:(NSString *)streamBareJidStr
 {

@@ -16,14 +16,14 @@
 @property (nonatomic, retain) NSString * streamBareJidStr;
 @property (nonatomic, retain) NSNumber * unReadCount;
 
-+ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
-                    withUserJIDStr:(NSString *)jidStr
-                  streamBareJidStr:(NSString *)streamBareJidStr;
-
 + (id)insertInManagedObjectContext:(NSManagedObjectContext *)moc
                     withUserJIDstr:(NSString *)jidStr
                 unReadMessageCount:(NSUInteger)unReatCount
                   streamBareJidStr:(NSString *)streamBareJidStr;
+
++ (BOOL)deleteObjectInManagedObjectContext:(NSManagedObjectContext *)moc
+                            withUserJIDstr:(NSString *)jidStr
+                          streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)updateOrInsertObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                                     withUserJIDstr:(NSString *)jidStr
@@ -35,9 +35,9 @@
                        nReadMessageCount:(NSUInteger)unReadCount
                         streamBareJidStr:(NSString *)streamBareJidStr;
 
-+ (BOOL)deleteObjectInManagedObjectContext:(NSManagedObjectContext *)moc
-                          withUserJIDstr:(NSString *)jidStr
-                        streamBareJidStr:(NSString *)streamBareJidStr;
++ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
+                    withUserJIDStr:(NSString *)jidStr
+                  streamBareJidStr:(NSString *)streamBareJidStr;
 
 + (BOOL)readObjectInManagedObjectContext:(NSManagedObjectContext *)moc
                             withUserJIDstr:(NSString *)jidStr
