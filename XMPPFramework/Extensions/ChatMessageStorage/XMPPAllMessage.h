@@ -32,16 +32,56 @@ typedef NS_ENUM(NSUInteger, XMPPMessageType){
     BOOL receiveSystemPushMessage;
     NSXMLElement *preferences;
 }
-
+/**
+ *  Init with the storage
+ *
+ *  @param storage The storage
+ *
+ *  @return The new created object
+ */
 - (id)initWithMessageStorage:(id <XMPPAllMessageStorage>)storage;
+/**
+ *  Init with the storage and the queue
+ *
+ *  @param storage The storage
+ *  @param queue   The action queue
+ *
+ *  @return The Created object
+ */
 - (id)initWithMessageStorage:(id <XMPPAllMessageStorage>)storage dispatchQueue:(dispatch_queue_t)queue;
-
+/**
+ *  ADD the active chat user Who is chatting with
+ *
+ *  @param userBareJidStr The active user base jid string
+ *  @param delegate       The delegate
+ *  @param delegateQueue  The dekegate queue
+ */
 - (void)addActiveUser:(NSString *)userBareJidStr Delegate:(id)delegate delegateQueue:(dispatch_queue_t)delegateQueue;
+/**
+ *  remove the active user when we close the chat with the active user
+ *
+ *  @param delegate The delegate
+ */
 - (void)removeActiveUserAndDelegate:(id)delegate;
-
+/**
+ *  Clear the Given user's chat history
+ *
+ *  @param userJid user JID
+ */
 - (void)clearChatHistoryWithUserJid:(XMPPJID *)userJid;
+/**
+ *  read all the unread message,aftering this action,this user will has no unread message
+ *
+ *  @param userJid user bare jid string
+ */
 - (void)readAllUnreadMessageWithUserJid:(XMPPJID *)userJid;
+/**
+ *  read a message with its messageID
+ *
+ *  @param messageID The given messageID
+ */
 - (void)readMessageWithMessageID:(NSString *)messageID;
+
 @property (readonly, strong) id <XMPPAllMessageStorage> xmppMessageStorage;
 
 @property (readwrite, assign) BOOL clientSideMessageArchivingOnly;

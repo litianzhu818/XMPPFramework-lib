@@ -261,7 +261,7 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
             //[xmppMessageStorage setPreferences:preferences forUser:myBareJid];
         }
         
-        // 
+        //  
         // 
         //  - Send new pref to server (if changed)
     }};
