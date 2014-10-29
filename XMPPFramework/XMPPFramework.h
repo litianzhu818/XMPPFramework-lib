@@ -82,3 +82,12 @@
 #import "XMPPChatRoom.h"
 #import "XMPPChatRoomCoreDataStorage.h"
 #import "XMPPChatRoomCoreDataStorageObject.h"
+
+#import "XMPPSimpleMessageObject.h"
+#import "XMPPChatMessageObject.h"
+#import "XMPPMessageCoreDataStorageObject.h"
+#import "XMPPUnReadMessageCoreDataStorageObject.h"
+
+#import "XMPPAllMessage.h"
+#import "XMPPMessageCoreDataStorage.h"
+#import "XMPPMessage+AdditionMessage.h"

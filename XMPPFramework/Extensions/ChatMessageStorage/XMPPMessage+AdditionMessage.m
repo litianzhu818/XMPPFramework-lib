@@ -174,7 +174,9 @@
     [dictionary setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
     //The readed message's hasBeenRead is 1,unread is 0
-    [dictionary setObject:[NSNumber numberWithBool:!(unReadMessageCount > 0)] forKey:@"hasBeenRead"];
+    //When is sent from me,we should note that this message is been sent failed as default 0
+    //After being sent succeed,we should modify this value into 1
+    [dictionary setObject:[NSNumber numberWithBool:(sendFromMe ? (unReadMessageCount > 0):!(unReadMessageCount > 0))] forKey:@"hasBeenRead"];
     [dictionary setObject:messageTime forKey:@"messageTime"];
     //If the unread message count is equal to zero,we will know that this message has been readed
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:unReadMessageCount] forKey:@"unReadMessageCount"];
@@ -187,5 +189,13 @@
         [dictionary setObject:xmppSimpleMessageObject forKey:@"messageBody"];
     
     return dictionary;
+}
+
+- (NSString *)messageID
+{
+    NSXMLElement *body = [self elementForName:@"body"];
+    if (!body)  return nil;
+    
+    return [[body elementForName:@"messageID"] stringValue];
 }
 @end

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPMesageCoreDataStorage.h"
+#import "XMPPMessageCoreDataStorage.h"
 #import "XMPPCoreDataStorageProtected.h"
 #import "XMPPMessageCoreDataStorageObject.h"
 #import "XMPPUnReadMessageCoreDataStorageObject.h"
@@ -29,15 +29,15 @@ static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #define AssertPrivateQueue() \
 NSAssert(dispatch_get_specific(storageQueueTag), @"Private method: MUST run on storageQueue");
 
-@implementation XMPPMesageCoreDataStorage
-static XMPPMesageCoreDataStorage *sharedInstance;
+@implementation XMPPMessageCoreDataStorage
+static XMPPMessageCoreDataStorage *sharedInstance;
 
 + (instancetype)sharedInstance
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         
-        sharedInstance = [[XMPPMesageCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
+        sharedInstance = [[XMPPMessageCoreDataStorage alloc] initWithDatabaseFilename:nil storeOptions:nil];
     });
     
     return sharedInstance;
@@ -322,4 +322,57 @@ static XMPPMesageCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)deleteMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        if (xmppStream){
+            
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+                                                                                                              withMessageID:messageID
+                                                                                                           streamBareJidStr:streamBareJidStr];
+            if (!updateObject) return;
+            [moc deleteObject:updateObject];
+        }
+
+    }];
+}
+- (void)updateMessageSendStatusWithMessageID:(NSString *)messageID success:(BOOL)success xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        if (xmppStream){
+            
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+                                                                                                              withMessageID:messageID
+                                                                                                           streamBareJidStr:streamBareJidStr];
+            if (!updateObject) return;
+            [updateObject setHasBeenRead:[NSNumber numberWithBool:success]];
+        }
+
+    }];
+}
+- (void)readMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        [message setHasBeenRead:[NSNumber numberWithBool:YES]];
+    }];
+}
+- (void)deleteMessageWithMessage:(XMPPMessageCoreDataStorageObject *)message xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        [moc deleteObject:message];
+    }];
+}
+- (void)updateMessageSendStatusWithMessage:(XMPPMessageCoreDataStorageObject *)message success:(BOOL)success xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        [message setHasBeenRead:[NSNumber numberWithBool:success]];
+    }];
+}
 @end

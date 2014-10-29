@@ -11,7 +11,7 @@
 
 @protocol XMPPAllMessageStorage;
 
-@interface XMPPMesageCoreDataStorage : XMPPCoreDataStorage<XMPPAllMessageStorage>
+@interface XMPPMessageCoreDataStorage : XMPPCoreDataStorage<XMPPAllMessageStorage>
 
 + (instancetype)sharedInstance;
 
