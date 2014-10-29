@@ -173,6 +173,7 @@
     [dictionary setObject:userJidStr forKey:@"bareJidStr"];
     [dictionary setObject:[NSNumber numberWithBool:sendFromMe] forKey:@"sendFromMe"];
     [dictionary setObject:[NSNumber numberWithUnsignedInteger:messageType] forKey:@"messageType"];
+    //The readed message's hasBeenRead is 1,unread is 0
     [dictionary setObject:[NSNumber numberWithBool:!(unReadMessageCount > 0)] forKey:@"hasBeenRead"];
     [dictionary setObject:messageTime forKey:@"messageTime"];
     //If the unread message count is equal to zero,we will know that this message has been readed

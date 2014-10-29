@@ -176,7 +176,6 @@ static XMPPMesageCoreDataStorage *sharedInstance;
     return strDate;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark Public API
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -238,8 +237,9 @@ static XMPPMesageCoreDataStorage *sharedInstance;
         
         if (stream){
             NSPredicate *predicate;
-            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
-                         streamBareJidStr,@"hasBeenRead",@0];
+            //!!!!:Notice:This method should not read the voice message
+            predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@ && %K == %@ && %K != %@",@"bareJidStr",bareUserJid,@"streamBareJidStr",
+                         streamBareJidStr,@"hasBeenRead",@0,@"messageType",@1];
             
             [fetchRequest setPredicate:predicate];
         }
@@ -300,6 +300,25 @@ static XMPPMesageCoreDataStorage *sharedInstance;
         }
         //Delete the unread message object
         [XMPPUnReadMessageCoreDataStorageObject deleteObjectInManagedObjectContext:moc withUserJIDstr:bareUserJid streamBareJidStr:streamBareJidStr];
+    }];
+}
+
+- (void)readMessageWithMessageID:(NSString *)messageID xmppStream:(XMPPStream *)xmppStream
+{
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        NSString *streamBareJidStr = [[self myJIDForXMPPStream:xmppStream] bare];
+        
+        if (xmppStream){
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K == %@ && %K == %@",@"messageID",messageID,@"streamBareJidStr",
+                         streamBareJidStr];
+            
+            XMPPMessageCoreDataStorageObject *updateObject = [XMPPMessageCoreDataStorageObject obejctInManagedObjectContext:moc
+                                                                                                              withPredicate:predicate];
+            if (!updateObject) return;
+            [updateObject setHasBeenRead:[NSNumber numberWithBool:YES]];
+        }
     }];
 }
 

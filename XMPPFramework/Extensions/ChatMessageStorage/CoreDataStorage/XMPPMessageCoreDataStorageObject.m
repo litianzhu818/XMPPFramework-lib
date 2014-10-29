@@ -172,6 +172,27 @@
 }
 #pragma mark -
 #pragma mark - Public Methods
+
++ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
+                     withPredicate:(NSPredicate *)predicate
+{
+    if (moc == nil) return nil;
+    if (predicate == nil) return nil;
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPMessageCoreDataStorageObject"
+                                              inManagedObjectContext:moc];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    [fetchRequest setIncludesPendingChanges:YES];
+    [fetchRequest setFetchLimit:1];
+
+    NSArray *results = [moc executeFetchRequest:fetchRequest error:nil];
+    
+    return (XMPPMessageCoreDataStorageObject *)[results lastObject];
+}
+
 + (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
                      withMessageID:(NSString *)messageID
                   streamBareJidStr:(NSString *)streamBareJidStr

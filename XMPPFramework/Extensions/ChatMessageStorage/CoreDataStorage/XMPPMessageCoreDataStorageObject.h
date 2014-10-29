@@ -25,6 +25,9 @@
 @property (nonatomic, retain) NSString                  * streamBareJidStr;
 
 + (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
+                     withPredicate:(NSPredicate *)predicate;
+
++ (id)obejctInManagedObjectContext:(NSManagedObjectContext *)moc
                      withMessageID:(NSString *)messageID
                   streamBareJidStr:(NSString *)streamBareJidStr;
 
