@@ -91,3 +91,6 @@
 #import "XMPPAllMessage.h"
 #import "XMPPMessageCoreDataStorage.h"
 #import "XMPPMessage+AdditionMessage.h"
+
+#import "XMPPLoginUser.h"
+#import "XMPPLoginUserCoreDataStorage.h"

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPFramework.h"
+#import "XMPPCoreDataStorage.h"
 #import "XMPPAllMessage.h"
 
 @protocol XMPPAllMessageStorage;

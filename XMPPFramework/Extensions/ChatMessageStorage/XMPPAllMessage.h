@@ -6,7 +6,11 @@
 //  Copyright (c) 2014年 Peter Lee. All rights reserved.
 //
 
-#import "XMPPFramework.h"
+#import "XMPPModule.h"
+#import "XMPPMessage.h"
+#import "NSXMLElement+XMPP.h"
+#import "XMPPMessageCoreDataStorage.h"
+#import "XMPPMessageCoreDataStorageObject.h"
 /**
  *  When we send a message,we should observer this notice for
  *  distinguishing the message has been send succeed or not
