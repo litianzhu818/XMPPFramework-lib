@@ -833,8 +833,6 @@
 			isa = PBXGroup;
 			children = (
 				E7BD80281A01E92400D05815 /* XMPPLoginUser */,
-				E7BD80311A01F2BA00D05815 /* XMPPLoginUser.h */,
-				E7BD80321A01F2BA00D05815 /* XMPPLoginUser.m */,
 				E703D07919D9088600D8E3A4 /* ChatMessageStorage */,
 				E7C4DF9D19D2A68B000CB916 /* ChatRoom */,
 				63F3B1971960F91500BD8134 /* BandwidthMonitor */,
@@ -1525,6 +1523,8 @@
 			isa = PBXGroup;
 			children = (
 				E7BD80291A01EF5E00D05815 /* CoreDataStorage */,
+				E7BD80311A01F2BA00D05815 /* XMPPLoginUser.h */,
+				E7BD80321A01F2BA00D05815 /* XMPPLoginUser.m */,
 			);
 			path = XMPPLoginUser;
 			sourceTree = "<group>";

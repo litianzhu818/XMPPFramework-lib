@@ -94,3 +94,4 @@
 
 #import "XMPPLoginUser.h"
 #import "XMPPLoginUserCoreDataStorage.h"
+#import "XMPPLoginUserCoreDataStorageObject.h"
