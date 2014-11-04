@@ -32,6 +32,7 @@
 @dynamic photo;
 @dynamic streamBareJidStr;
 @dynamic subscription, primitiveSubscription;
+@dynamic masterBareJidStr;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark - primitive Parameters
@@ -64,6 +65,21 @@
 - (void)setPrimitiveSubscription:(NSString *)primitiveSubscription
 {
     subscription = primitiveSubscription;
+}
+
+- (NSString *)masterBareJidStr
+{
+    [self willAccessValueForKey:@"masterBareJidStr"];
+    NSString *value = [self primitiveValueForKey:@"masterBareJidStr"];
+    [self didAccessValueForKey:@"masterBareJidStr"];
+    return value;
+}
+            
+- (void)setMasterBareJidStr:(NSString *)value
+{
+    [self willChangeValueForKey:@"masterBareJidStr"];
+    [self setPrimitiveValue:value forKey:@"masterBareJidStr"];
+    [self didChangeValueForKey:@"masterBareJidStr"];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,6 +186,7 @@
     chatRoom.nickName = nil;
     chatRoom.subscription = nil;
     chatRoom.photo = nil;
+    chatRoom.masterBareJidStr = nil;
     
     return chatRoom;
 }
@@ -291,18 +308,19 @@ streamBareJidStr:(NSString *)streamBareJidStr
 
 - (void)updateWithDictionary:(NSDictionary *)Dic
 {
-    NSString *jid = [Dic objectForKey:@"jid"];
-    NSString *nickName = [Dic objectForKey:@"nickname"];
-    NSString *subscription = [Dic objectForKey:@"subscription"];
-    
-    if (jid == nil){
+    NSString *jidStr = [Dic objectForKey:@"jid"];
+    NSString *nickNameStr = [Dic objectForKey:@"nickname"];
+    NSString *subscriptionStr = [Dic objectForKey:@"subscription"];
+    NSString *masterBareJidStr = [Dic objectForKey:@"masterBareJidStr"];
+    if (jidStr == nil){
         NSLog(@"XMPPUserCoreDataStorageObject: invalid Dic (missing or invalid jid): %@", Dic.description);
         return;
     }
     
-    self.jid = jid;
-    self.nickName = nickName;
-    self.subscription = subscription;
+    self.jid = jidStr;
+    self.nickName = nickNameStr;
+    self.subscription = subscriptionStr;
+    self.masterBareJidStr = masterBareJidStr;
     //TODO:这里需要处理photo属性
 }
 

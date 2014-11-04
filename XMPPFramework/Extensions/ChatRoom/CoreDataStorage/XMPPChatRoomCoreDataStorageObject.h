@@ -18,12 +18,12 @@
     NSString * streamBareJidStr;
     NSString * subscription;
 }
-
 @property (nonatomic, strong) NSString * jid;
 @property (nonatomic, strong) NSString * nickName;
 @property (nonatomic, strong) UIImage  * photo;
 @property (nonatomic, strong) NSString * streamBareJidStr;
 @property (nonatomic, strong) NSString * subscription;
+@property (nonatomic, strong) NSString * masterBareJidStr;
 /**
  *  Insert a new XMPPChatRoomCoreDataStorageObject into the CoraData System
  *

@@ -114,6 +114,14 @@
  *          NO,Other cases
  */
 - (BOOL)inviteUser:(NSArray *)userArray andCreateChatRoomWithNickName:(NSString *)room_nickName;
+/**
+ *  Set the nickname for name
+ *
+ *  @param nickName     chat room nickname
+ *  @param bareJidStr   The chat room's bare jid string
+ */
+- (void)setNickName:(NSString *)nickName forBareJidStr:(NSString *)bareJidStr;
+
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,6 +146,8 @@
 - (NSArray *)idsForXMPPStream:(XMPPStream *)stream;
 
 - (void)InsertOrUpdateChatRoomWith:(NSDictionary *)dic xmppStream:(XMPPStream *)stream;
+
+- (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr  xmppStream:(XMPPStream *)stream;
 
 @optional
 
@@ -192,6 +202,7 @@
  * </item>
  **/
 - (void)xmppChatRoom:(XMPPChatRoom *)sender didReceiveChatRoomItem:(NSXMLElement *)item;
+- (void)xmppChatRoom:(XMPPChatRoom *)sender didAlterNickName:(NSString *)newNickName withBareJidStr:(NSString *)bareJidStr;
 
 
 @end

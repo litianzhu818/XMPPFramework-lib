@@ -346,4 +346,25 @@ static XMPPChatRoomCoreDataStorage *sharedInstance;
     }];
 }
 
+- (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr xmppStream:(XMPPStream *)stream
+{
+    if (!nickname || !bareJidStr) return;
+    
+    
+    XMPPLogTrace();
+    
+    [self scheduleBlock:^{
+        
+        NSManagedObjectContext *moc = [self managedObjectContext];
+        XMPPChatRoomCoreDataStorageObject *chatRoom = [self chatRoomForID:bareJidStr
+                                                               xmppStream:stream
+                                                     managedObjectContext:moc];
+        
+        if (chatRoom){
+            [chatRoom setNickName:nickname];
+        }
+    
+    }];
+}
+
 @end

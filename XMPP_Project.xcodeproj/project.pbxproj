@@ -306,6 +306,8 @@
 		E7C4DFAF19D3A3D5000CB916 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = E7C4DFAD19D3A3D5000CB916 /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		E7D2C59D19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7D2C59B19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7D2C59E19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7D2C59C19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m */; };
+		E7E02CBE1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h in Headers */ = {isa = PBXBuildFile; fileRef = E7E02CBC1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h */; };
+		E7E02CBF1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */; };
 		E7EAE3DE19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = E7EAE3DC19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7EAE3DF19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = E7EAE3DD19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m */; };
 /* End PBXBuildFile section */
@@ -624,6 +626,8 @@
 		E7C4DFAD19D3A3D5000CB916 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		E7D2C59B19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomCoreDataStorageObject.h; sourceTree = "<group>"; };
 		E7D2C59C19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomCoreDataStorageObject.m; sourceTree = "<group>"; };
+		E7E02CBC1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomUserCoreDataStorageObject.h; sourceTree = "<group>"; };
+		E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomUserCoreDataStorageObject.m; sourceTree = "<group>"; };
 		E7EAE3DC19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPChatRoomCoreDataStorage.h; sourceTree = "<group>"; };
 		E7EAE3DD19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPChatRoomCoreDataStorage.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1561,6 +1565,8 @@
 				E7EAE3DD19D3C403000DA662 /* XMPPChatRoomCoreDataStorage.m */,
 				E7D2C59B19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.h */,
 				E7D2C59C19D3DC7D00C7A06C /* XMPPChatRoomCoreDataStorageObject.m */,
+				E7E02CBC1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h */,
+				E7E02CBD1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m */,
 			);
 			path = CoreDataStorage;
 			sourceTree = "<group>";
@@ -1658,6 +1664,7 @@
 				63F3B4FA1960F91700BD8134 /* XMPPvCardTempTel.h in Headers */,
 				63F3B55A1960F91700BD8134 /* DDAbstractDatabaseLogger.h in Headers */,
 				63F3B4EE1960F91700BD8134 /* XMPPvCardTempAdr.h in Headers */,
+				E7E02CBE1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.h in Headers */,
 				63F3B54C1960F91700BD8134 /* DDList.h in Headers */,
 				63F3B5481960F91700BD8134 /* XMPPMessage+XEP_0333.h in Headers */,
 				63F3B4EC1960F91700BD8134 /* XMPPvCardTemp.h in Headers */,
@@ -1809,6 +1816,7 @@
 				63F3B5661960F91700BD8134 /* DDContextFilterLogFormatter.m in Sources */,
 				63F3B4F11960F91700BD8134 /* XMPPvCardTempAdrTypes.m in Sources */,
 				63F3B50D1960F91700BD8134 /* XMPPDateTimeProfiles.m in Sources */,
+				E7E02CBF1A086EEB00D67034 /* XMPPChatRoomUserCoreDataStorageObject.m in Sources */,
 				63F3B4811960F91700BD8134 /* NSNumber+XMPP.m in Sources */,
 				63F3B5451960F91700BD8134 /* NSXMLElement+XEP_0297.m in Sources */,
 				63F3B55B1960F91700BD8134 /* DDAbstractDatabaseLogger.m in Sources */,

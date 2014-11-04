@@ -399,6 +399,15 @@ enum XMPPChatRoomFlags
     }];
 }
 
+- (void)setNickNameFromStorageWithNickName:(NSString *)nickname withBareJidStr:(NSString *)bareJidStr
+{
+    if (!dispatch_get_specific(moduleQueueTag)) return;
+    
+    [xmppChatRoomStorage setNickNameFromStorageWithNickName:nickname withBareJidStr:bareJidStr xmppStream:xmppStream];
+    
+    [multicastDelegate xmppChatRoom:self didAlterNickName:nickname withBareJidStr:bareJidStr];
+}
+
 -(void)transChatRoomUserDataWithJSONStr:(NSString *)json
 {
     NSAssert(dispatch_get_specific(moduleQueueTag) , @"Invoked on incorrect queue");
@@ -531,6 +540,40 @@ enum XMPPChatRoomFlags
     return YES;
 }
 
+- (void)setNickName:(NSString *)nickName forBareJidStr:(NSString *)bareJidStr
+{
+    if (!nickName || !bareJidStr) return;
+    
+    dispatch_block_t block=^{
+        
+        @autoreleasepool{
+            
+//            NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"jabber:iq:aft_groupchat"];
+//            [query addAttributeWithName:@"query_type" stringValue:@"aft_group_member"];
+//            [query addAttributeWithName:@"nickname" stringValue:room_nickName];
+//            
+//            NSString *jsonStr = [userArray JSONString];
+//            [query setStringValue:jsonStr];
+//            
+//            XMPPIQ *iq = [XMPPIQ iqWithType:@"set" elementID:[xmppStream generateUUID]];
+//            [iq addChild:query];
+//            
+//            [xmppIDTracker addElement:iq
+//                               target:self
+//                             selector:@selector(handleCreateChatRoomAndInviteUserIQ:withInfo:)
+//                              timeout:60];
+//            
+//            [xmppStream sendElement:iq];
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark XMPPIDTracker
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -585,6 +628,9 @@ enum XMPPChatRoomFlags
     <iq to='juliet@example.com/balcony' type='result' id='112233'>
     <query xmlns="jabber:iq:aft_groupchat" groupid="1000000000003"/>
     </iq>
+     <iq to='juliet@example.com/balcony' type='result' id='112233'>
+     <query xmlns="jabber:iq:aft_groupchat" groupid="1000000000003" ,name = "nickname" ,master="1234567@192.168.1.100" action="add"/>
+     </iq>
      */
     dispatch_block_t block = ^{
         @autoreleasepool {
@@ -635,6 +681,57 @@ enum XMPPChatRoomFlags
         <query xmlns="jabber:iq:aft_groupchat" groupid="10000001" query_type="aft_group_member">
             nickname
         </query>
+     </iq>
+     */
+    dispatch_block_t block = ^{
+        @autoreleasepool {
+            //if there is a error attribute
+            if ([[iq attributeStringValueForName:@"type"] isEqualToString:@"error"]) {
+                [multicastDelegate xmppChatRoom:self didCreateChatRoomError:iq];
+                return ;
+            }
+            
+            //if this action have succeed
+            if ([[iq type] isEqualToString:@"result"]) {
+                //find the query elment
+                NSXMLElement *query = [iq elementForName:@"query" xmlns:@"jabber:iq:aft_groupchat"];
+                
+                if (query) {
+                    //init a XMPPChatRoomCoreDataStorageObject to restore the info
+                    NSString *roomID = [query attributeStringValueForName:@"groupid"];
+                    NSString *roomNickName = [query attributeStringValueForName:@"nickname"];
+                    NSDictionary *tempDictionary = @{
+                                                     @"jid":roomID,
+                                                     @"nickname":roomNickName
+                                                     };
+                    NSArray *tempArray = @[tempDictionary];
+                    
+                    NSString *jsonStr = [tempArray JSONString];
+                    
+                    if (roomID) {
+                        //TODO:Here need save the room info into the database
+                        [self transFormDataWithJSONStr:jsonStr];
+                        [multicastDelegate xmppChatRoom:self didCreateChatRoomID:roomID roomNickName:roomNickName];
+                    }
+                }
+                
+            }
+            
+        }
+    };
+    
+    if (dispatch_get_specific(moduleQueueTag))
+        block();
+    else
+        dispatch_async(moduleQueue, block);
+}
+
+- (void)handleAlterChatRoomNickNameIQ:(XMPPIQ *)iq withInfo:(XMPPBasicTrackingInfo *)basicTrackingInfo{
+    /*
+     <iq from="cc4bc427-eeaa-41eb-84a7-f713c0205a9f@192.168.1.167/caoyue-PC" type="result" id="aad5a">
+     <query xmlns="jabber:iq:aft_groupchat" groupid="10000001" query_type="aft_group_member">
+     nickname
+     </query>
      </iq>
      */
     dispatch_block_t block = ^{
